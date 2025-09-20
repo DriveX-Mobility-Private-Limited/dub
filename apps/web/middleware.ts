@@ -1,45 +1,82 @@
-import { NextRequest, NextResponse } from "next/server";
+import {
+  AdminMiddleware,
+  ApiMiddleware,
+  AppMiddleware,
+  AxiomMiddleware,
+  CreateLinkMiddleware,
+  LinkMiddleware,
+} from "@/lib/middleware";
+import { parse } from "@/lib/middleware/utils";
+import {
+  ADMIN_HOSTNAMES,
+  API_HOSTNAMES,
+  APP_HOSTNAMES,
+  DEFAULT_REDIRECTS,
+  isValidUrl,
+} from "@dub/utils";
+import { PARTNERS_HOSTNAMES } from "@dub/utils/src/constants";
+import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
+import PartnersMiddleware from "./lib/middleware/partners";
+import { supportedWellKnownFiles } from "./lib/well-known";
 
 export const config = {
   matcher: [
-    "/((?!api/|_next/|_proxy/|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|login|register|dashboard).*)",
+    "/((?!api/|_next/|_proxy/|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest).*)",
   ],
 };
 
-export default async function middleware(req: NextRequest) {
-  const url = req.nextUrl.clone();
-  const hostname = req.headers.get("host") || "";
-  const pathname = url.pathname;
-
-  // Skip root path
-  if (pathname === "/") {
-    return NextResponse.next();
+export default async function middleware(req: NextRequest, ev: NextFetchEvent) {
+  const { domain, path, key, fullKey } = parse(req);
+  
+  AxiomMiddleware(req, ev);
+  
+  // Handle your custom domain explicitly
+  if (domain.includes("drivex.co.in")) {
+    return AppMiddleware(req);
   }
-
-  // Extract the potential short link key
-  const key = pathname.slice(1); // Remove leading slash
-
-  if (key && key.length > 0) {
-    // Check if this is a short link by making an API call
-    try {
-      const response = await fetch(`${url.origin}/api/links/${key}/exists`, {
-        headers: {
-          'Authorization': `Bearer ${process.env.API_SECRET || ''}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.exists && data.url) {
-          // Redirect to the target URL
-          return NextResponse.redirect(data.url);
-        }
-      }
-    } catch (error) {
-      console.error('Link lookup error:', error);
+  
+  // for App
+  if (APP_HOSTNAMES.has(domain)) {
+    return AppMiddleware(req);
+  }
+  
+  // for API
+  if (API_HOSTNAMES.has(domain)) {
+    return ApiMiddleware(req);
+  }
+  
+  // for public stats pages
+  if (path.startsWith("/stats/")) {
+    return NextResponse.rewrite(new URL(`/${domain}${path}`, req.url));
+  }
+  
+  // for .well-known routes
+  if (path.startsWith("/.well-known/")) {
+    const file = path.split("/.well-known/").pop();
+    if (file && supportedWellKnownFiles.includes(file)) {
+      return NextResponse.rewrite(
+        new URL(`/wellknown/${domain}/${file}`, req.url),
+      );
     }
   }
-
-  // If not a valid short link, return 404
-  return NextResponse.rewrite(new URL('/404', req.url));
+  
+  // default redirects for dub.sh
+  if (domain === "dub.sh" && DEFAULT_REDIRECTS[key]) {
+    return NextResponse.redirect(DEFAULT_REDIRECTS[key]);
+  }
+  
+  // for Admin
+  if (ADMIN_HOSTNAMES.has(domain)) {
+    return AdminMiddleware(req);
+  }
+  
+  if (PARTNERS_HOSTNAMES.has(domain)) {
+    return PartnersMiddleware(req);
+  }
+  
+  if (isValidUrl(fullKey)) {
+    return CreateLinkMiddleware(req);
+  }
+  
+  return LinkMiddleware(req, ev);
 }
