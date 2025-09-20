@@ -1,4 +1,4 @@
-import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export const config = {
   matcher: [
@@ -6,29 +6,16 @@ export const config = {
   ],
 };
 
-export default async function middleware(req: NextRequest, ev: NextFetchEvent) {
-  try {
-    const hostname = req.headers.get("host") || "";
-    
-    // Handle your custom domain specifically
-    if (hostname.includes("dubv1.drivex.co.in")) {
-      // Import dynamically to catch any module errors
-      const { parse } = await import("@/lib/middleware/utils");
-      const { AppMiddleware } = await import("@/lib/middleware");
-      
-      const { domain, path, key, fullKey } = parse(req);
-      return AppMiddleware(req);
-    }
-    
-    // For Vercel domains, try the full middleware
-    const { parse } = await import("@/lib/middleware/utils");
-    const { AppMiddleware, LinkMiddleware } = await import("@/lib/middleware");
-    
-    const { domain, path, key, fullKey } = parse(req);
-    return LinkMiddleware(req, ev);
-    
-  } catch (error) {
-    console.error('Middleware error:', error);
-    return NextResponse.next();
+export default async function middleware(req: NextRequest) {
+  const url = req.nextUrl.clone();
+  const hostname = req.headers.get("host") || "";
+  const pathname = url.pathname;
+
+  // Handle short link redirects
+  if (pathname !== "/" && pathname !== "/login" && !pathname.startsWith("/dashboard")) {
+    // This is likely a short link - redirect to API handler
+    return NextResponse.rewrite(new URL(`/api/links${pathname}`, req.url));
   }
+
+  return NextResponse.next();
 }
