@@ -8,18 +8,25 @@ export const config = {
 
 export default async function middleware(req: NextRequest, ev: NextFetchEvent) {
   try {
-    // Import dynamically to catch any module errors
-    const { parse } = await import("@/lib/middleware/utils");
-    const { AppMiddleware, ApiMiddleware, LinkMiddleware } = await import("@/lib/middleware");
+    const hostname = req.headers.get("host") || "";
     
-    const { domain, path, key, fullKey } = parse(req);
-    
-    // Basic routing logic
-    if (domain.includes("dub.drivex.co.in")) {
+    // Handle your custom domain specifically
+    if (hostname.includes("dubv1.drivex.co.in")) {
+      // Import dynamically to catch any module errors
+      const { parse } = await import("@/lib/middleware/utils");
+      const { AppMiddleware } = await import("@/lib/middleware");
+      
+      const { domain, path, key, fullKey } = parse(req);
       return AppMiddleware(req);
     }
     
+    // For Vercel domains, try the full middleware
+    const { parse } = await import("@/lib/middleware/utils");
+    const { AppMiddleware, LinkMiddleware } = await import("@/lib/middleware");
+    
+    const { domain, path, key, fullKey } = parse(req);
     return LinkMiddleware(req, ev);
+    
   } catch (error) {
     console.error('Middleware error:', error);
     return NextResponse.next();
