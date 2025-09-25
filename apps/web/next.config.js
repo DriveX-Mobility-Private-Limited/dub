@@ -6,14 +6,13 @@ module.exports = withAxiom({
   reactStrictMode: false,
   transpilePackages: [
     "shiki",
-    "@dub/prisma", 
+    "@dub/prisma",
     "@dub/email",
     "@boxyhq/saml-jackson",
   ],
   typescript: {
     ignoreBuildErrors: true,
   },
-});
   experimental: {
     optimizePackageImports: [
       "@dub/email",
