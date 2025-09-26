@@ -4,11 +4,11 @@ export const SHORT_DOMAIN =
   process.env.NEXT_PUBLIC_APP_SHORT_DOMAIN || "dub.sh";
 
 export const APP_HOSTNAMES = new Set([
-  process.env.NEXT_PUBLIC_APP_DOMAIN,
+  `app.${process.env.NEXT_PUBLIC_APP_DOMAIN}`,
   `preview.${process.env.NEXT_PUBLIC_APP_DOMAIN}`,
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
-    ? `https://${process.env.NEXT_PUBLIC_APP_DOMAIN}`
-    : process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
+  "localhost:8888",
+  "localhost",
+
 ]);
 
 export const APP_DOMAIN =
