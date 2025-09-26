@@ -53,7 +53,7 @@ export const PLANS = [
       yearly: 0,
     },
     limits: {
-      links: 100,
+      links: 999999,
       clicks: 1_000,
       payouts: 0,
       domains: 3,
@@ -65,6 +65,7 @@ export const PLANS = [
       api: 60,
       retention: "30-day",
     },
+  },
   {
     name: "Pro",
     link: "https://dub.co/help/article/pro-plan",
