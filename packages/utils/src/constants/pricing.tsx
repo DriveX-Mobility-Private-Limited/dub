@@ -53,7 +53,7 @@ export const PLANS = [
       yearly: 0,
     },
     limits: {
-      links: 30,
+      links: 25,
       clicks: 1_000,
       payouts: 0,
       domains: 3,
