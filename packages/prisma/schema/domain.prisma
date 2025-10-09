@@ -49,3 +49,4 @@ model DefaultDomains {
   appdrivexcoin Boolean  @default(true)
   projectId     String   @unique
   project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
