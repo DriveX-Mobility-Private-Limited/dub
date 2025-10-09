@@ -3,7 +3,7 @@ import { withWorkspace } from "@/lib/auth";
 import z from "@/lib/zod";
 import { getDefaultDomainsQuerySchema } from "@/lib/zod/schemas/domains";
 import { prisma } from "@dub/prisma";
-import { DUB_DOMAINS_ARRAY } from "@dub/utils";
+import { DUB_DOMAINS_ARRAY, SHORT_DOMAIN } from "@dub/utils";
 import { NextResponse } from "next/server";
 
 // GET /api/domains/default - get default domains
@@ -28,16 +28,24 @@ export const GET = withWorkspace(
         appdrivexcoin: true,
       },
     });
-
+    const fieldToDomainMap: Record<string, string> = {
+      dubsh: "dub.sh",
+      dublink: "dub.link",
+      chatgpt: "chatg.pt",
+      sptifi: "spti.fi",
+      gitnew: "git.new",
+      callink: "cal.link",
+      amznid: "amzn.id",
+      ggllink: "ggl.link",
+      figpage: "fig.page",
+      appdrivexcoin: SHORT_DOMAIN,
+    };
+    
     let defaultDomains: string[] = [];
-
     if (data) {
       defaultDomains = Object.keys(data)
-        .filter((key) => data[key])
-        .map(
-          (domain) =>
-            DUB_DOMAINS_ARRAY.find((d) => d.replace(".", "") === domain)!,
-        )
+        .filter((key) => data[key] === true)
+        .map((key) => fieldToDomainMap[key])
         .filter((domain) =>
           search ? domain?.toLowerCase().includes(search.toLowerCase()) : true,
         );
@@ -83,7 +91,7 @@ export const PATCH = withWorkspace(
         amznid: defaultDomains.includes("amzn.id"),
         ggllink: defaultDomains.includes("ggl.link"),
         figpage: defaultDomains.includes("fig.page"),
-        appdrivexcoin: defaultDomains.includes("app.drivex.co.in"),    
+        appdrivexcoin: defaultDomains.includes(SHORT_DOMAIN),
       },
     });
 
