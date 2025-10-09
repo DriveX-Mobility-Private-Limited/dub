@@ -12,11 +12,11 @@ export const DUB_DOMAINS = [
     description: "The default domain for all new accounts.",
     projectId: DUB_WORKSPACE_ID,
   },
-  ...(process.env.NEXT_PUBLIC_IS_DUB
+  ...(!process.env.NEXT_PUBLIC_IS_DUB
     ? [
         {
-          id: "clxp3lfsb00011na8tfs7t0lx",
-          slug: "dub.link",
+          id: "custom_appdrivexcoin",
+          slug: "app.drivex.co.in",
           verified: true,
           primary: true,
           archived: false,
@@ -26,6 +26,10 @@ export const DUB_DOMAINS = [
             "Premium short domain on Dub – only available on our Pro plan and above.",
           projectId: DUB_WORKSPACE_ID,
         },
+      ]
+    : []),
+  ...(process.env.NEXT_PUBLIC_IS_DUB
+    ? [
         {
           id: "clce1z7cs00y8rbstk4xtnj0k",
           slug: "chatg.pt",
