@@ -45,17 +45,7 @@ model RegisteredDomain {
   @@index(expiresAt(sort: Asc))
 }
 model DefaultDomains {
-  id          String    @id @default(cuid())
-  dubsh       Boolean   @default(false)
-  dublink     Boolean   @default(false)
-  chatgpt     Boolean   @default(false)
-  sptifi      Boolean   @default(false)
-  gitnew      Boolean   @default(false)
-  callink     Boolean   @default(false)
-  amznid      Boolean   @default(false)
-  ggllink     Boolean   @default(false)
-  figpage     Boolean   @default(false)
-  appdrivexcoin Boolean @default(true)
-  projectId   String    @unique
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-}
+  id            String   @id @default(cuid())
+  appdrivexcoin Boolean  @default(true)
+  projectId     String   @unique
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
