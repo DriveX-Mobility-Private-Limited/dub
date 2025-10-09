@@ -25,6 +25,7 @@ export const GET = withWorkspace(
         amznid: true,
         ggllink: true,
         figpage: true,
+        appdrivexcoin: true,
       },
     });
 
@@ -82,6 +83,7 @@ export const PATCH = withWorkspace(
         amznid: defaultDomains.includes("amzn.id"),
         ggllink: defaultDomains.includes("ggl.link"),
         figpage: defaultDomains.includes("fig.page"),
+        appdrivexcoin: defaultDomains.includes("app.drivex.co.in"),    
       },
     });
 
